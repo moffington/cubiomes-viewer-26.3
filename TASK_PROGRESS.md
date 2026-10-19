@@ -34,9 +34,15 @@
 
 ## GitHub publication
 - User authorized publication under the connected account moffington.
-- Preparing community README, complete source, release notes and checksums.
-- CLI still reports no authenticated account after the device-code attempt;
-  no fork, push or release has been created. Publication remains pending sign-in.
+- GitHub CLI authentication completed and account identity verified as moffington.
+- Created public fork: https://github.com/moffington/cubiomes-viewer-26.3
+- Published community prerelease v4.1.2-mc26.3 with the revision 2 Windows ZIP,
+  matching complete source ZIP, licenses, validation records and SHA256 checksums:
+  https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3
+- Release tag points to tested source 3c9bb729323bdda9fefb7ae60df69a81caed5d89.
+- Downloaded all three public assets without authentication; every byte and hash
+  matched the prepared files, and both ZIP CRC checks passed. No publication
+  blockers remain. This publication record follows the fixed release tag.
 
 ## Go to marker request (revision 2)
 - Added an exact, fixed-size red/white crosshair and X/Z label on Go to Apply/OK.
@@ -48,6 +54,7 @@
   also passed; preview visually checked offscreen.
 - Portable packaging uses a separate r2 folder without changing the running
   viewer. Matching source, notices and test logs accompany the release.
+- User confirmed the coordinate marker works in the updated viewer.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.
