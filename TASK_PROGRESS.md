@@ -10,9 +10,9 @@
   fork is more complete for this task. SeedMapper also uses this backend.
 
 ## Remaining
-- Revision 3: final portable-archive verification and publication. Implementation,
-  Release build, 60 offscreen checks, seven UI regressions and offscreen visual
-  inspection are complete. No generation changes.
+- No implementation, build, packaging or publication blockers remain. Native
+  visible-window checks are left to the user; see MARKERS_GUIDE.md. No generation
+  changes were needed for revision 3.
 
 ## Implementation and validation completed
 - Workspace-local Qt 6.8.3 / matching MinGW 13.1.0; native x64 Release built.
@@ -69,7 +69,15 @@
 - 60 offscreen checks and seven seed/version UI regressions passed. All four
   requested structure types tested using real generated icons. UI inspected
   offscreen; generation library unchanged. Guide: MARKERS_GUIDE.md.
-- Revision 3 packaging/publication in progress in a separate output directory.
+- Revision 3 portable ZIP CRC and relocation passed all 60 checks. New output
+  folder preserved the user's running older build. No new runtime dependencies.
+- Preserved the user's newer GitHub README edit with a normal merge; no force push.
+- Published revision 3 as a separate community prerelease; the earlier release
+  remains available. All three public downloads were fetched without sign-in and
+  matched the local bytes/hashes; complete source matched the fixed release tag:
+  https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3-r3
+- Release source: 54fb97fb61e8668f1e17c13e9d9f78ef9efff5a5. This completion record
+  follows that fixed release tag. No user's personal marker data was packaged.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.
