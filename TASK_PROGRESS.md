@@ -26,6 +26,16 @@
 - Packaged native executable with Qt/compiler DLLs, plugins and licenses.
 - Portable ZIP CRC and relocation with spaces passed all 22 offscreen checks.
 - Corresponding source archive and release notes included alongside the ZIP.
+- Screenshot follow-up: different input seeds explained the ocean/island mismatch.
+  Production-object UI regression passed seed editing and version-dropdown signals:
+  matching inputs give matching island results. A public upstream fixture switches
+  Plains to Dappled Forest when selecting 26.3. User confirmed the island matches.
+  No executable correction was needed.
+
+## GitHub publication
+- User authorized publication under the connected account moffington.
+- Preparing community README, complete source, release notes and checksums.
+- No binary rebuild is required; executable contents remain unchanged.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.

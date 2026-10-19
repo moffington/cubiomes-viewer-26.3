@@ -1,113 +1,85 @@
-# Cubiomes Viewer
+# Cubiomes Viewer for Minecraft Java 26.3
 
-Cubiomes Viewer provides a graphical interface for the efficient and flexible
-seed-finding utilities provided by [cubiomes](https://github.com/Cubitect/cubiomes)
-and a map viewer for the Minecraft biomes and structure generation.
+A community Windows build of [Cubitect's Cubiomes Viewer](https://github.com/Cubitect/cubiomes-viewer),
+maintained here by [moffington](https://github.com/moffington), with the generation
+backend from [xpple/cubiomes](https://github.com/xpple/cubiomes).
 
-The tool is designed for high performance and supports Minecraft Java Edition
-main releases up to 1.21.
+**[Download the Windows build](https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3)**
+and choose `Cubiomes-Viewer-26.3-Windows-x64.zip` under Assets.
+The complete source ZIP and SHA256 checksums are attached to the same release.
+This is a community fork, not an official Cubitect release.
 
+[Build instructions](BUILD_WINDOWS_26.3.md) · [Validation details](VALIDATION.md) ·
+[Original upstream documentation](UPSTREAM_README.md)
 
-## Download
+Extract the complete portable ZIP and run **cubiomes-viewer.exe**. Keep its DLLs,
+`platforms`, `styles`, and `qt.conf` alongside it. Requires Windows 10/11 x64.
+No installer, Minecraft, Java, browser, or network connection is required.
 
-Precompiled binaries can be found in the [releases section](https://github.com/Cubitect/cubiomes-viewer/releases)
-on GitHub. This includes single file executables, which are statically
-linked against [Qt](https://www.qt.io).
+This is Cubitect's original native Qt viewer with a focused backend update.
+Select **26.3** in the Minecraft version list. New sessions default to 26.3;
+an existing saved session keeps its selected version. Map generation defaults
+to two worker threads; this can be adjusted in preferences.
 
-A Flatpak for the tool is available on
-[Flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
+## Added support
+- Overworld, Nether and End biome maps using xpple/cubiomes 26.3 generation.
+- Dappled Forest and Sulfur Caves names, colors, queries and biome selection.
+  Lower the map Y value (for example to 0) to inspect underground biomes.
+- Abandoned Camp toggle, biome viability, structure analysis and search filter.
+  The camp toggle reuses the existing hut icon and has its own tooltip.
+- The backend's 26.3 End ring correction and updated structure rules.
+- Existing seed input, panning, zoom, dimension switching, image export and
+  older version selection remain available. Custom structure salts use the
+  fork's configuration-provider API.
 
-For Arch Linux users, the tool may be found in the
-[AUR](https://aur.archlinux.org/packages/cubiomes-viewer) thanks to
-[JakobDev](https://github.com/JakobDev).
+## Versions and source
+- Viewer base: Cubitect/cubiomes-viewer `3acc863245b30c655498d60323c50da0865e0199`.
+- Backend: xpple/cubiomes `b99f6e472018cab903a096697117aab9d9170a19` (unmodified).
+  https://github.com/xpple/cubiomes/commit/b99f6e472018cab903a096697117aab9d9170a19
+- Qt 6.8.3, MinGW GCC 13.1.0, Release x86-64. Generation uses `-fwrapv` and
+  avoids fast-math and machine-specific CPU tuning.
+- The accompanying source ZIP includes the viewer, pinned backend, tests,
+  licenses and build instructions. Third-party attribution is in `licenses/`.
 
-Non-PC platforms, such as macOS, are not formally supported, but you can check
-[here](https://github.com/Cubitect/cubiomes-viewer/issues/107) for more
-information on this issue.
+## Validation and limits
+The executable passed 22 isolated Qt offscreen checks, including actual tile
+rendering in all dimensions. Upstream biome/structure/piece/carver tests passed
+against the exact backend objects linked into this executable. All five upstream
+suites also passed in a separate complete library build. An independent Java RNG
+implementation matched 300 candidate positions across 15 structure types using
+extracted final 26.3 structure-set data; all 256 biome IDs matched the final camp
+eligibility tags. See `VALIDATION.md` and the included test logs for details.
 
+Structure markers are predictions. The inherited backend approximates some
+terrain checks; pyramids, jungle temples and mansions can have false positives,
+and spawn is approximate. Camp markers use the backend's biome viability check;
+their complete block layout and actual terrain placement have not been checked
+in-game. No exhaustive validation of every structure type, every seed, or advanced
+seed-search combinations was performed. The biome tree is the fork's dedicated
+26.3 tree (annotated with its originating snapshot); the whole tree has not been
+independently compared against final vanilla code. Sulfur Caves has a generation
+smoke check, rather than a separately sourced fixed-coordinate fixture.
 
-## Build from source
+No Minecraft instance, launcher or server was started for development or tests.
+Development checks used no visible viewer or other GUI. Basic interactive map use
+was subsequently confirmed, including a known Dark Forest island. Clipboard,
+dialogs and image export have not been systematically verified.
 
-Build instructions can be found in the [buildguide](buildguide.md).
+## Brief manual smoke test
+1. Run the executable and select 26.3. Enter seed `-3829811542736183482`.
+2. Use Go to position at X `68148`, Z `80990`, with map Y `77`; the biome query
+   should report Dappled Forest. Pan, zoom and change the seed.
+3. Return to that seed and enable Abandoned Camp. At X `224`, Z `-384` there
+   should be a camp marker. Check Overworld, Nether and End switching.
+4. For the End ring fixture, use seed `856461443495910397`, End, X `-371136`,
+   Z `-64`; at coarse biome scale the 26.3 map gives End Highlands, while 26.2
+   gives End Barrens. These are backend fixtures, not an in-game test performed
+   during this task.
 
+The optional `--self-test` argument runs the checks offscreen and exits without
+showing a window or loading your settings. It needs temporary write access beside
+the executable. Ordinary operation retains upstream's user-profile settings and
+session storage behavior.
 
-## Basic feature overview
-
-The tool features a map viewer that outlines the biomes of the Overworld,
-Nether and End dimensions, with a wide zoom range and with toggles for each
-supported structure type. The active game version and seed can be changed
-on the fly while a matching seeds list stores a working buffer of seeds for
-examination.
-
-The integrated seed finder is highly customizable, utilizing a hierarchical
-condition system that allows the user to look for features that are relative to
-one another. Conditions can be based on a varity of criteria, including
-structure placement, world spawn point and requirements for the biomes of an
-area. The search supports Quad-Hut and Quad-Monument seed generators, which can
-quickly look for seeds that include extremely rare structure constellations.
-For more complex searches, the tool provides logic gates in the form of helper
-conditions and can integrate Lua scripts to create custom filters that can be
-edited right inside the tool.
-
-It is also possible to find Locations in a fixed seed. In this mode, the
-conditions are checked against a list of trial positions instead of the
-world origin. Each location that passes the conditions is then collected
-with additional information on where each individual condition was triggered.
-
-An analysis of the biomes and structures can be performed in their respective
-tabs. This provides information on the amount of biomes and structures that
-are available in an area, as well as their size and positions.
-
-
-## Screenshots
-
-Screenshots were taken of Cubiomes Viewer v4.0.
-
-![seeds](etc/screenshot_seeds-fs8.png
-"Searching for a quad-hut near a stronghold with a good biome variety")
-
-![locations](etc/screenshot_locations-fs8.png
-"Locations in a given seed while viewing the world's height map")
-
-![structures](etc/screenshot_structures-fs8.png
-"Examining structures in the nether")
-
-
-## Languages
-
-The active language can be selected under `Edit preferences`, which currently includes translations for:
-
-- English
-- German
-- Chinese
-
-Chinese translations are provided by [SunnySlopes](https://github.com/SunnySlopes)
-and are maintained at [his fork](https://github.com/SunnySlopes/cubiomes-viewer).
-
-
-## Known issues
-
-Desert Pyramids, Jungle Temples and, to a lesser extent, Woodland Mansions can
-fail to generate in 1.18+ due to unsuitable terrain. Cubiomes will make an
-attempt to estimate the terrain based on the biomes and climate noise. However,
-expect some inaccurate results.
-
-The World Spawn point for pre-1.18 versions can sometimes be off because it
-depends on the presence of a grass block, that cubiomes cannot test for.
-
-
-## Legal information
-
-The main code is under the GPLv3, see [LICENSE](LICENSE), while other
-components are released under their respective author licenses:
-
-- Biome and structure generation from cubiomes, licensed under MIT.
-- Cross platform [Qt](https://www.qt.io/licensing) GUI toolkit, available under (L)GPLv3.
-- Dark Qt theme derived from [QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet), licensed under MIT.
-- Biome colors and icons are inspired by [Amidst](https://github.com/toolbox4minecraft/amidst), licensed under GPLv3.
-- [Lua](https://www.lua.org/license.html) is distributed under the terms of the MIT license.
-
-NOT AN OFFICIAL MINECRAFT PRODUCT.
-NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
-
-
+NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR
+MICROSOFT.

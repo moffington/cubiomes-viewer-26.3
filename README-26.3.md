@@ -49,8 +49,9 @@ independently compared against final vanilla code. Sulfur Caves has a generation
 smoke check, rather than a separately sourced fixed-coordinate fixture.
 
 No Minecraft instance, launcher or server was started for development or tests.
-No visible viewer or other GUI was opened. Interactive appearance, mouse input,
-clipboard, dialogs and image export remain for manual inspection.
+Development checks used no visible viewer or other GUI. Basic interactive map use
+was subsequently confirmed, including a known Dark Forest island. Clipboard,
+dialogs and image export have not been systematically verified.
 
 ## Brief manual smoke test
 1. Run the executable and select 26.3. Enter seed `-3829811542736183482`.
