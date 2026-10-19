@@ -35,7 +35,19 @@
 ## GitHub publication
 - User authorized publication under the connected account moffington.
 - Preparing community README, complete source, release notes and checksums.
-- No binary rebuild is required; executable contents remain unchanged.
+- CLI still reports no authenticated account after the device-code attempt;
+  no fork, push or release has been created. Publication remains pending sign-in.
+
+## Go to marker request (revision 2)
+- Added an exact, fixed-size red/white crosshair and X/Z label on Go to Apply/OK.
+- Marker follows map pan/zoom/resize and stays in its originating dimension.
+- New Go to replaces it; seed changes and the context-menu clear action remove it.
+- Immediate travel now cancels an earlier animation so it cannot undo the jump.
+- Release rebuilt with one low-priority job; all 30 offscreen checks passed,
+  including eight dialog/rendering regressions. Seven UI seed/version checks
+  also passed; preview visually checked offscreen.
+- Portable packaging uses a separate r2 folder without changing the running
+  viewer. Matching source, notices and test logs accompany the release.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.

@@ -5,7 +5,7 @@ maintained here by [moffington](https://github.com/moffington), with the generat
 backend from [xpple/cubiomes](https://github.com/xpple/cubiomes).
 
 **[Download the Windows build](https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3)**
-and choose `Cubiomes-Viewer-26.3-Windows-x64.zip` under Assets.
+and choose `Cubiomes-Viewer-26.3-r2-Windows-x64.zip` under Assets.
 The complete source ZIP and SHA256 checksums are attached to the same release.
 This is a community fork, not an official Cubitect release.
 
@@ -20,6 +20,14 @@ This is Cubitect's original native Qt viewer with a focused backend update.
 Select **26.3** in the Minecraft version list. New sessions default to 26.3;
 an existing saved session keeps its selected version. Map generation defaults
 to two worker threads; this can be adjusted in preferences.
+
+## Go to coordinate marker (revision 2)
+Press **Ctrl+G** (or **Map > Go to...**), enter X/Z and press **Apply** or **OK**.
+A red-and-white crosshair marks the exact coordinates, with an X/Z label beside
+it. The marker follows that location while you pan and zoom. Another Go to
+replaces it; right-click the map and choose **Clear coordinate marker** to remove
+it. It belongs to the dimension where it was placed, is cleared on a seed change,
+and lasts until you close the viewer. Markers are not saved in session files.
 
 ## Added support
 - Overworld, Nether and End biome maps using xpple/cubiomes 26.3 generation.
@@ -42,7 +50,7 @@ to two worker threads; this can be adjusted in preferences.
   licenses and build instructions. Third-party attribution is in `licenses/`.
 
 ## Validation and limits
-The executable passed 22 isolated Qt offscreen checks, including actual tile
+The executable passed 30 isolated Qt offscreen checks, including actual tile
 rendering in all dimensions. Upstream biome/structure/piece/carver tests passed
 against the exact backend objects linked into this executable. All five upstream
 suites also passed in a separate complete library build. An independent Java RNG
@@ -68,7 +76,8 @@ dialogs and image export have not been systematically verified.
 ## Brief manual smoke test
 1. Run the executable and select 26.3. Enter seed `-3829811542736183482`.
 2. Use Go to position at X `68148`, Z `80990`, with map Y `77`; the biome query
-   should report Dappled Forest. Pan, zoom and change the seed.
+   should report Dappled Forest. Apply/OK should leave a red-and-white coordinate
+   marker. Pan and zoom to check it stays at that location; right-click to clear.
 3. Return to that seed and enable Abandoned Camp. At X `224`, Z `-384` there
    should be a camp marker. Check Overworld, Nether and End switching.
 4. For the End ring fixture, use seed `856461443495910397`, End, X `-371136`,

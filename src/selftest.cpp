@@ -3,8 +3,13 @@
 #include "util.h"
 #include "ui_mainwindow.h"
 #include "cubiomes/util.h"
+#include "gotodialog.h"
 
+#include <QCheckBox>
 #include <QComboBox>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QTemporaryDir>
 #include <cstdio>
 
@@ -149,6 +154,77 @@ int runSelfTests(int argc, char **argv)
     window.setSeed(wi, DIM_OVERWORLD);
     check(window.mapView->world->g.mc == MC_1_16, "viewer older-version switch regression");
     window.mapView->deleteWorld();
+
+    // Exercise the real dialog buttons and rendered pixels, without showing it.
+    MapView markerMap;
+    markerMap.resize(384, 256);
+    markerMap.setConfig(config);
+    wi.mc = MC_26_3;
+    markerMap.setSeed(wi, DIM_OVERWORLD, LayerOpt());
+    auto goTo = [&](qreal x, qreal z, bool animate, QDialogButtonBox::StandardButton button) {
+        GotoDialog dialog(&markerMap, markerMap.getX(), markerMap.getZ(), markerMap.getScale());
+        dialog.findChild<QLineEdit*>("lineX")->setText(QString::number(x, 'f', 1));
+        dialog.findChild<QLineEdit*>("lineZ")->setText(QString::number(z, 'f', 1));
+        dialog.findChild<QLineEdit*>("lineScale")->setText("4");
+        dialog.findChild<QCheckBox*>("checkAnimate")->setChecked(animate);
+        dialog.findChild<QDialogButtonBox*>("buttonBox")->button(button)->click();
+    };
+    auto renderMap = [&]() {
+        markerMap.grab();
+        markerMap.world->waitForIdle();
+        return markerMap.grab().toImage();
+    };
+    const QColor markerRed(255, 64, 80);
+    goTo(-1234.5, 6789.5, false, QDialogButtonBox::Apply);
+    QImage markerImage = renderMap();
+    check(markerMap.getX() == -1234.5 && markerMap.getZ() == 6789.5 &&
+          markerImage.pixelColor(192, 128) == markerRed,
+          "Go to Apply marks the exact negative/fractional coordinates");
+    const QString preview = qEnvironmentVariable("CUBIOMES_SELFTEST_PREVIEW");
+    if (!preview.isEmpty()) markerImage.save(preview);
+
+    markerMap.setView(-1234.5 + 64, 6789.5 - 32, 4);
+    bool anchored = renderMap().pixelColor(176, 136) == markerRed;
+    markerMap.zoom(2);
+    anchored &= renderMap().pixelColor(160, 144) == markerRed;
+    markerMap.resize(512, 288);
+    anchored &= renderMap().pixelColor(224, 160) == markerRed;
+    check(anchored, "coordinate marker stays at its world position through pan/zoom/resize");
+
+    goTo(100, 200, true, QDialogButtonBox::Ok);
+    bool animated = markerMap.anielapsed.isValid();
+    markerMap.atime = 1; // Finish travel without a sleep or an event loop.
+    markerImage = renderMap();
+    check(animated && markerMap.getX() == 100 && markerMap.getZ() == 200 &&
+          markerImage.pixelColor(256, 144) == markerRed,
+          "Go to OK replaces the marker after animated travel");
+
+    goTo(1000, 2000, true, QDialogButtonBox::Apply);
+    goTo(300, -400, false, QDialogButtonBox::Apply);
+    check(!markerMap.anielapsed.isValid() && markerMap.getX() == 300 &&
+          markerMap.getZ() == -400 && renderMap().pixelColor(256, 144) == markerRed,
+          "immediate Go to cancels earlier animated travel");
+
+    goTo(9999, 9999, false, QDialogButtonBox::Close);
+    check(markerMap.getX() == 300 && markerMap.getZ() == -400 &&
+          renderMap().pixelColor(256, 144) == markerRed,
+          "closing Go to without Apply preserves the previous location and marker");
+
+    markerMap.setSeed(wi, DIM_NETHER, LayerOpt());
+    bool dimensionMarker = renderMap().pixelColor(256, 144) != markerRed;
+    markerMap.setSeed(wi, DIM_OVERWORLD, LayerOpt());
+    dimensionMarker &= renderMap().pixelColor(256, 144) == markerRed;
+    check(dimensionMarker, "coordinate marker is confined to its originating dimension");
+
+    wi.seed++;
+    markerMap.setSeed(wi, DIM_OVERWORLD, LayerOpt());
+    check(renderMap().pixelColor(256, 144) != markerRed,
+          "changing the seed clears the coordinate marker");
+    goTo(300, -400, false, QDialogButtonBox::Apply);
+    markerMap.clearCoordinateMarker();
+    check(renderMap().pixelColor(256, 144) != markerRed,
+          "clear coordinate marker removes the rendered indicator");
+    markerMap.deleteWorld();
     printf("Self-test complete: %d failure(s).\n", failures);
     return failures ? 1 : 0;
 }

@@ -43,6 +43,7 @@ public:
     void setView(qreal x, qreal z, qreal scale = 0);
     void animateView(qreal x, qreal z, qreal scale);
     void zoom(qreal factor);
+    void setCoordinateMarker(qreal x, qreal z);
 
     // animation
     qreal x_src, z_src, s_src;
@@ -68,6 +69,7 @@ public:
 private:
     void settingsToWorld();
     void runAni();
+    void drawCoordinateMarker(QPainter& painter, qreal fx, qreal fz);
 
 signals:
     void layerChange(int mode, int disp);
@@ -78,6 +80,7 @@ public slots:
     void copySeed();
     void copyText(QString txt);
     void onGoto();
+    void clearCoordinateMarker();
 
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
     void resizeEvent(QResizeEvent *) Q_DECL_OVERRIDE;
@@ -111,6 +114,11 @@ private:
     Pos bstart;
     bool measure;
     int updatecounter;
+
+    bool markerSet = false;
+    QPointF markerPos;
+    uint64_t markerSeed = 0;
+    int markerDim = DIM_OVERWORLD;
 
     std::vector<Shape> shapes;
 

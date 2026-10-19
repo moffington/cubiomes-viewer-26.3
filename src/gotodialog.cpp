@@ -51,6 +51,7 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
             mapview->animateView(x, z, scale);
         else
             mapview->setView(x, z, scale);
+        mapview->setCoordinateMarker(x, z);
     }
     else if (b == QDialogButtonBox::Reset)
     {

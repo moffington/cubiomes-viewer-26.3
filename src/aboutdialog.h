@@ -29,7 +29,7 @@ inline QString getVersStr()
         s += QString("dev%1").arg(-1-VERS_PATCH);
     else
         s += QString("%1").arg(VERS_PATCH);
-    return s + "-mc26.3";
+    return s + "-mc26.3-r2";
 }
 
 

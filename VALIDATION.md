@@ -3,9 +3,9 @@
 ## Passed
 - Windows x86-64 Release build with Qt 6.8.3 / MinGW GCC 13.1.0.
 - Portable executable with restricted PATH, packaged Qt DLLs/plugins and no
-  developer Qt paths: `--self-test` exited 0, all 22 checks passed.
+  developer Qt paths: `--self-test` exited 0, all 30 checks passed.
 - ZIP CRC verified; extracted into a different directory containing spaces and
-  all 22 checks passed again. Windows/offscreen/style plugin DLL dependency
+  all 30 checks passed again. Windows/offscreen/style plugin DLL dependency
   loading also passed without creating a native window.
 - Offscreen checks exercise version/biome gates, new labels/colors, the upstream
   fixed Dappled Forest coordinate, underground Sulfur Caves generation, tiled vs
@@ -22,6 +22,21 @@
   Includes negative seeds/regions, triangular placement and End's center exclusion.
 - All 256 biome IDs checked against the 18 final-release abandoned camp biome
   tags; every eligibility result matched.
+
+## Revision 2: exact Go to coordinate marker
+- Native Windows Release rebuilt with one low-priority compilation job.
+- 30/30 isolated offscreen checks passed, including eight marker regressions.
+- Actual Apply/OK buttons checked against rendered marker pixels, including
+  negative/fractional coordinates, animated travel and cancellation of an
+  earlier animation by an immediate jump.
+- Checked marker anchoring after pan, zoom and resize, closing without Apply,
+  dimension hiding/restoration, seed replacement and clearing the marker.
+- The production-object seed/version UI regression passed all seven checks.
+- Offscreen image inspected for crosshair placement and readable X/Z label.
+  A system font was supplied only to the offscreen preview; it is not bundled.
+- The generation library and its production objects are unchanged in r2.
+- No visible viewer was launched. Final interactive Windows inspection remains
+  with the user. Markers are temporary and are not serialized into sessions.
 
 ## Reference provenance
 Backend fixtures are in the pinned fork's `tests/test_biomes.c`,

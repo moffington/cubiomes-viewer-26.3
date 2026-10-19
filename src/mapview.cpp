@@ -106,6 +106,8 @@ void MapView::refresh()
 
 void MapView::setSeed(WorldInfo wi, int dim, LayerOpt lopt)
 {
+    if (markerSet && markerSeed != wi.seed)
+        clearCoordinateMarker();
     prevx = focusx = getX();
     prevz = focusz = getZ();
     velx = velz = 0;
@@ -128,6 +130,7 @@ void MapView::setSeed(WorldInfo wi, int dim, LayerOpt lopt)
 
 void MapView::setView(qreal x, qreal z, qreal scale)
 {
+    anielapsed.invalidate();
     if (scale > 0)
     {
         blocks2pix = 1.0 / scale;
@@ -167,6 +170,66 @@ void MapView::zoom(qreal factor)
     if (factor < 1 && blocks2pix < zoommin) blocks2pix = zoommin;
     if (factor > 1 && blocks2pix > zoommax) blocks2pix = zoommax;
     update();
+}
+
+void MapView::setCoordinateMarker(qreal x, qreal z)
+{
+    if (!world)
+        return;
+    markerPos = QPointF(x, z);
+    markerSeed = world->wi.seed;
+    markerDim = world->dim;
+    markerSet = true;
+    update();
+}
+
+void MapView::clearCoordinateMarker()
+{
+    markerSet = false;
+    update();
+}
+
+void MapView::drawCoordinateMarker(QPainter& painter, qreal fx, qreal fz)
+{
+    if (!markerSet || !world || markerDim != world->dim)
+        return;
+    const QPointF point((markerPos.x() - fx) * blocks2pix + width() / 2.0,
+                        (markerPos.y() - fz) * blocks2pix + height() / 2.0);
+    // Clip before painting: distant world coordinates can exceed Qt's raster range.
+    if (!QRectF(rect()).adjusted(-14, -14, 14, 14).contains(point))
+        return;
+
+    painter.save();
+    const QColor red(255, 64, 80);
+    // A fixed-size crosshair with a white outline stays legible over every biome.
+    for (const QPen& pen : {QPen(Qt::black, 5), QPen(Qt::white, 3), QPen(red, 1.5)})
+    {
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(point, 7, 7);
+        painter.drawLine(point + QPointF(-12, 0), point + QPointF(12, 0));
+        painter.drawLine(point + QPointF(0, -12), point + QPointF(0, 12));
+    }
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(red);
+    painter.drawEllipse(point, 2, 2);
+
+    auto coordinate = [](qreal value) {
+        return QString::number(value, 'f', value == floor(value) ? 0 : 1);
+    };
+    const QString label = tr("X: %1  Z: %2")
+            .arg(coordinate(markerPos.x()), coordinate(markerPos.y()));
+    const QFontMetrics fm = painter.fontMetrics();
+    QRectF box(0, 0, fm.horizontalAdvance(label) + 10, fm.height() + 6);
+    box.moveTopLeft(point + QPointF(16, -box.height() - 5));
+    if (box.right() > width() - 3) box.moveRight(width() - 3);
+    if (box.left() < 3) box.moveLeft(3);
+    if (box.top() < 3) box.moveTop(point.y() + 16);
+    painter.setBrush(QColor(0, 0, 0, 200));
+    painter.drawRoundedRect(box, 3, 3);
+    painter.setPen(Qt::white);
+    painter.drawText(box, Qt::AlignCenter, label);
+    painter.restore();
 }
 
 bool MapView::getShow(int stype)
@@ -422,6 +485,8 @@ void MapView::showContextMenu(const QPoint &pos)
     }
 
     menu->addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
+    if (markerSet && world && markerDim == world->dim)
+        menu->addAction(tr("Clear coordinate marker"), this, &MapView::clearCoordinateMarker);
     if (world)
     {
         QString txt = tr("Copy seed:");
@@ -526,6 +591,8 @@ void MapView::paintEvent(QPaintEvent *)
             painter.setPen(QPen(QColor(255, 255, 128, 255), 1));
             painter.drawText(textrec, s);
         }
+
+        drawCoordinateMarker(painter, fx, fz);
 
         bool active = world->isBusy();
         if (active || velx || velz || anielapsed.isValid())
