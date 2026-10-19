@@ -10,7 +10,8 @@
   fork is more complete for this task. SeedMapper also uses this backend.
 
 ## Remaining
-- Package portable Windows runtime, source, licenses, and validation notes.
+- No implementation/build blockers. Final visible UI and in-game checks are
+  explicitly left to the user; see README-26.3.md.
 
 ## Implementation and validation completed
 - Workspace-local Qt 6.8.3 / matching MinGW 13.1.0; native x64 Release built.
@@ -22,10 +23,13 @@
 - 300 independent candidate-position comparisons across 15 structure types passed.
 - All 256 biome IDs matched final 26.3 camp eligibility (18 allowed biomes).
 - Added user/build/validation documentation with explicit accuracy limits.
+- Packaged native executable with Qt/compiler DLLs, plugins and licenses.
+- Portable ZIP CRC and relocation with spaces passed all 22 offscreen checks.
+- Corresponding source archive and release notes included alongside the ZIP.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.
 - No game files, processes, or system settings will be changed.
-- Backend parameter tree is annotated 26.3-1 snapshot; confirm available coverage
-  and describe the limits of fixture-based validation honestly.
+- Backend parameter tree is annotated with its originating 26.3 snapshot;
+  fixture-based validation and full-equivalence limits are documented.
 - Initial Git Schannel failure resolved with per-command OpenSSL backend.

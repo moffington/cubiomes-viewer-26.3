@@ -4,6 +4,9 @@
 - Windows x86-64 Release build with Qt 6.8.3 / MinGW GCC 13.1.0.
 - Portable executable with restricted PATH, packaged Qt DLLs/plugins and no
   developer Qt paths: `--self-test` exited 0, all 22 checks passed.
+- ZIP CRC verified; extracted into a different directory containing spaces and
+  all 22 checks passed again. Windows/offscreen/style plugin DLL dependency
+  loading also passed without creating a native window.
 - Offscreen checks exercise version/biome gates, new labels/colors, the upstream
   fixed Dappled Forest coordinate, underground Sulfur Caves generation, tiled vs
   scalar biome queries in every dimension, legacy and corrected End ring results,
