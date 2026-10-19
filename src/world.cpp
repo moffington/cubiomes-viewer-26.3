@@ -1,6 +1,7 @@
 #include "world.h"
 
 #include "util.h"
+#include "markers.h"
 
 #include <QPainterPath>
 #include <QSettings>
@@ -1378,6 +1379,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             // q was processed in another thread and is now done
             for (VarPos& vp : *q->spos)
             {
+                if (!hiddenStructures.isEmpty() && hiddenStructures.contains(
+                    SavedMarker::structureKey(sopt, vp.p.x, vp.p.z))) continue;
                 qreal x = vw/2.0 + (vp.p.x - focusx) * blocks2pix;
                 qreal y = vh/2.0 + (vp.p.z - focusz) * blocks2pix;
 
@@ -1498,7 +1501,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     Pos* sp = spawn; // atomic fetch
-    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0 && lopt.mode != LOPT_STRUCTS)
+    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0 && lopt.mode != LOPT_STRUCTS &&
+        !hiddenStructures.contains(SavedMarker::structureKey(D_SPAWN, sp->x, sp->z)))
     {
         qreal x = vw/2.0 + (sp->x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (sp->z - focusz) * blocks2pix;
@@ -1525,6 +1529,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         do
         {
             Pos p = (*shs).p;
+            if (hiddenStructures.contains(SavedMarker::structureKey(D_STRONGHOLD, p.x, p.z))) continue;
             qreal x = vw/2.0 + (p.x - focusx) * blocks2pix;
             qreal y = vh/2.0 + (p.z - focusz) * blocks2pix;
             QPointF d = QPointF(x, y);
@@ -1580,7 +1585,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         seldo = false;
     }
 
-    if (selopt != D_NONE)
+    if (selopt != D_NONE && !hiddenStructures.contains(SavedMarker::structureKey(selopt, selvp.p.x, selvp.p.z)))
     {   // draw selection overlay
         const QPixmap& icon = getMapIcon(selopt, &selvp);
         qreal x = vw/2.0 + (selvp.p.x - focusx) * blocks2pix;

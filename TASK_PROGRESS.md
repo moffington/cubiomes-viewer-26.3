@@ -10,8 +10,9 @@
   fork is more complete for this task. SeedMapper also uses this backend.
 
 ## Remaining
-- No implementation/build blockers. Final visible UI and in-game checks are
-  explicitly left to the user; see README-26.3.md.
+- Revision 3: final portable-archive verification and publication. Implementation,
+  Release build, 60 offscreen checks, seven UI regressions and offscreen visual
+  inspection are complete. No generation changes.
 
 ## Implementation and validation completed
 - Workspace-local Qt 6.8.3 / matching MinGW 13.1.0; native x64 Release built.
@@ -55,6 +56,20 @@
 - Portable packaging uses a separate r2 folder without changing the running
   viewer. Matching source, notices and test logs accompany the release.
 - User confirmed the coordinate marker works in the updated viewer.
+
+## Revision 3: saved markers and usability
+- Persistent named markers and notes, manual completion/reopening, right-click
+  structure actions, green completion badges and hidden completed predictions.
+- Markers tab with progress/type/text/dimension filters, Go to, Enter activation,
+  edit, copy coordinates, confirmed deletion and backup export/import.
+- Go to Save marker checkbox, Ctrl+M / Ctrl+Shift+M shortcuts, and two target
+  presets for Overworld villages/strongholds and Nether bastions/fortresses.
+- Atomic/locked JSON storage in the user profile; exact 64-bit seeds; separate
+  seed/version/world-type/dimension data; failed writes and corrupt data reported.
+- 60 offscreen checks and seven seed/version UI regressions passed. All four
+  requested structure types tested using real generated icons. UI inspected
+  offscreen; generation library unchanged. Guide: MARKERS_GUIDE.md.
+- Revision 3 packaging/publication in progress in a separate output directory.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.

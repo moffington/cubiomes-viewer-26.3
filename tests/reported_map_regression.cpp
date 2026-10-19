@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     initBiomeColors(g_biomeColors);
     initBiomeTypeColors(g_tempsColors);
     setStructureConfigProvider(getStructureConfig_override);
-    MainWindow window(temp.path() + "/session.save", "");
+    MainWindow window(temp.path() + "/session.save", "", nullptr, temp.path() + "/markers.json");
     window.autosaveTimer.stop();
     Config config = window.config;
     config.mapThreads = 1;

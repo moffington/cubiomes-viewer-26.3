@@ -102,6 +102,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkSaveMarker">
+     <property name="text">
+      <string>Save this location as a marker (kept after closing)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

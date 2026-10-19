@@ -4,8 +4,8 @@ A community Windows build of [Cubitect's Cubiomes Viewer](https://github.com/Cub
 maintained here by [moffington](https://github.com/moffington), with the generation
 backend from [xpple/cubiomes](https://github.com/xpple/cubiomes).
 
-**[Download the Windows build](https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3)**
-and choose `Cubiomes-Viewer-26.3-r2-Windows-x64.zip` under Assets.
+**[Download the Windows build](https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3-r3)**
+and choose `Cubiomes-Viewer-26.3-r3-Windows-x64.zip` under Assets.
 The complete source ZIP and SHA256 checksums are attached to the same release.
 This is a community fork, not an official Cubitect release.
 
@@ -21,13 +21,23 @@ Select **26.3** in the Minecraft version list. New sessions default to 26.3;
 an existing saved session keeps its selected version. Map generation defaults
 to two worker threads; this can be adjusted in preferences.
 
-## Go to coordinate marker (revision 2)
-Press **Ctrl+G** (or **Map > Go to...**), enter X/Z and press **Apply** or **OK**.
-A red-and-white crosshair marks the exact coordinates, with an X/Z label beside
-it. The marker follows that location while you pan and zoom. Another Go to
-replaces it; right-click the map and choose **Clear coordinate marker** to remove
-it. It belongs to the dimension where it was placed, is cleared on a seed change,
-and lasts until you close the viewer. Markers are not saved in session files.
+## Saved markers and exploration progress (revision 3)
+Right-click any spot to **Add marker here...**, or right-click a structure icon to
+save it or mark it completed. Markers keep their names, notes, and completed
+status after closing the app. Blue badges mean to do; green checks mean completed.
+
+Open **Markers / Ctrl+M** to filter, revisit, edit, copy coordinates, or manage
+progress. **Hide completed on map** hides completed sites; the list still lets
+you reopen them. **Map > Find exploration targets** switches to villages and
+strongholds in the Overworld, or bastions and fortresses in the Nether.
+
+**Ctrl+G** still places a temporary coordinate indicator. Tick **Save this
+location as a marker** to keep it. **Ctrl+Shift+M** adds a marker at map center.
+Saved data is separate for each seed, Minecraft version, world type and dimension,
+and is kept in your user profile across portable app updates. Export/import
+backups from the Markers tab to copy your progress to another computer.
+
+See [the marker workflow guide](MARKERS_GUIDE.md) for storage, backups and details.
 
 ## Added support
 - Overworld, Nether and End biome maps using xpple/cubiomes 26.3 generation.
@@ -50,7 +60,7 @@ and lasts until you close the viewer. Markers are not saved in session files.
   licenses and build instructions. Third-party attribution is in `licenses/`.
 
 ## Validation and limits
-The executable passed 30 isolated Qt offscreen checks, including actual tile
+The executable passed 60 isolated Qt offscreen checks, including actual tile
 rendering in all dimensions. Upstream biome/structure/piece/carver tests passed
 against the exact backend objects linked into this executable. All five upstream
 suites also passed in a separate complete library build. An independent Java RNG

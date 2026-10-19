@@ -8,6 +8,7 @@
 #include "extgendialog.h"
 #include "layerdialog.h"
 #include "maptoolsdialog.h"
+#include "markerstab.h"
 #include "message.h"
 #include "presetdialog.h"
 #include "tabbiomes.h"
@@ -44,11 +45,13 @@
 #endif
 
 
-MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent)
+MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent, const QString& markerPath)
     : QMainWindow(parent)
     , ui()
     , dock()
     , mapView()
+    , markerStore()
+    , markersTab()
     , formCond()
     , formGen48()
     , formControl()
@@ -75,6 +78,8 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     ui = new Ui::MainWindow;
     dock = new QDockWidget(tr("Map"), this);
     mapView = new MapView(this);
+    markerStore = new MarkerStore(markerPath, this);
+    mapView->setMarkerStore(markerStore);
 
     ui->setupUi(this);
     resize(1600, 900);
@@ -97,6 +102,9 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     ui->tabContainerSearch->addTab(new TabLocations(this), tr("Locations"));
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
+    markersTab = new MarkersTab(this, markerStore);
+    ui->tabContainer->addTab(markersTab, tr("Markers"));
+    connect(mapView, &MapView::showMarkersRequested, this, &MainWindow::showSavedMarkers);
 
     laction.resize(LOPT_MAX);
     laction[LOPT_BIOMES] = ui->actionBiomes;
@@ -193,6 +201,18 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     addMapAction(D_GATEWAY);
 
     saction[D_GRID]->setChecked(true);
+
+    ui->menuMap->addSeparator();
+    auto *markersAction = ui->menuMap->addAction(tr("Saved markers..."), this, &MainWindow::showSavedMarkers,
+                                                QKeySequence(Qt::CTRL + Qt::Key_M));
+    markersAction->setObjectName("actionSavedMarkers");
+    ui->menuMap->addAction(tr("Add marker at map center..."), mapView, &MapView::addMarkerAtCenter,
+                           QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M));
+    auto *targets = ui->menuMap->addMenu(tr("Find exploration targets"));
+    targets->addAction(tr("Villages and strongholds (Overworld)"), this, [=] { focusExplorationTargets(false); })
+        ->setObjectName("actionOverworldTargets");
+    targets->addAction(tr("Bastions and fortresses (Nether)"), this, [=] { focusExplorationTargets(true); })
+        ->setObjectName("actionNetherTargets");
 
     ui->splitterMap->setSizes(QList<int>({750, 1000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 3000}));
@@ -306,6 +326,22 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::showSavedMarkers()
+{
+    markerStore->reload();
+    ui->tabContainer->setCurrentWidget(markersTab);
+    markersTab->refresh();
+}
+
+void MainWindow::focusExplorationTargets(bool nether)
+{
+    for (int opt = D_DESERT; opt < D_STRUCT_NUM; opt++)
+        if (saction[opt]) saction[opt]->setChecked(nether ? (opt == D_BASTION || opt == D_FORTESS) :
+                                                          (opt == D_VILLAGE || opt == D_STRONGHOLD));
+    if (mapView->world) setSeed(mapView->world->wi, nether ? DIM_NETHER : DIM_OVERWORLD);
+    if (mapView->getScale() > 64) mapView->setView(mapView->getX(), mapView->getZ(), 64);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

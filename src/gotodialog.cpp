@@ -27,6 +27,7 @@ GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
     ui->lineScale->setText(QString::asprintf("%.4f", scale));
 
     ui->checkAnimate->setChecked(g_animate);
+    ui->checkSaveMarker->setEnabled(map->canSaveMarkers());
 }
 
 GotoDialog::~GotoDialog()
@@ -52,6 +53,7 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         else
             mapview->setView(x, z, scale);
         mapview->setCoordinateMarker(x, z);
+        if (ui->checkSaveMarker->isChecked()) mapview->savePointMarker(x, z);
     }
     else if (b == QDialogButtonBox::Reset)
     {

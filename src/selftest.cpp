@@ -13,6 +13,8 @@
 #include <QTemporaryDir>
 #include <cstdio>
 
+int runSavedMarkerTests(MainWindow& window, const QString& folder);
+
 int runSelfTests(int argc, char **argv)
 {
     qputenv("QT_QPA_PLATFORM", "offscreen");
@@ -105,7 +107,7 @@ int runSelfTests(int argc, char **argv)
     check(p.x != normal.x || p.z != normal.z, "custom salt provider reaches backend placement");
     g_extgen.reset();
 
-    MainWindow window(scratch.path() + "/session.save", "");
+    MainWindow window(scratch.path() + "/session.save", "", nullptr, scratch.path() + "/markers.json");
     window.autosaveTimer.stop();
     Config config = window.config;
     config.mapThreads = 1;
@@ -225,6 +227,7 @@ int runSelfTests(int argc, char **argv)
     check(renderMap().pixelColor(256, 144) != markerRed,
           "clear coordinate marker removes the rendered indicator");
     markerMap.deleteWorld();
+    failures += runSavedMarkerTests(window, scratch.path());
     printf("Self-test complete: %d failure(s).\n", failures);
     return failures ? 1 : 0;
 }

@@ -36,13 +36,14 @@ struct ISaveTab
 };
 
 class MapView;
+class MarkersTab;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QString sessionpath, QString resultspath, QWidget *parent = 0);
+    explicit MainWindow(QString sessionpath, QString resultspath, QWidget *parent = 0, const QString& markerPath = QString());
     virtual ~MainWindow();
     virtual void closeEvent(QCloseEvent *event) override;
 
@@ -74,6 +75,8 @@ public slots:
     void mapGoto(qreal x, qreal z, qreal scale);
     void mapZoom(qreal factor);
     void setBiomeColorRc(QString rc);
+    void showSavedMarkers();
+    void focusExplorationTargets(bool nether);
 
     void setProgressIndication(double value = -1);
 
@@ -131,6 +134,8 @@ public:
     Ui::MainWindow *ui;
     QDockWidget *dock;
     MapView *mapView;
+    MarkerStore *markerStore;
+    MarkersTab *markersTab;
 
     FormConditions *formCond;
     FormGen48 *formGen48;

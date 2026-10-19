@@ -3,9 +3,9 @@
 ## Passed
 - Windows x86-64 Release build with Qt 6.8.3 / MinGW GCC 13.1.0.
 - Portable executable with restricted PATH, packaged Qt DLLs/plugins and no
-  developer Qt paths: `--self-test` exited 0, all 30 checks passed.
+  developer Qt paths: `--self-test` exited 0, all 60 checks passed.
 - ZIP CRC verified; extracted into a different directory containing spaces and
-  all 30 checks passed again. Windows/offscreen/style plugin DLL dependency
+  all 60 checks passed again. Windows/offscreen/style plugin DLL dependency
   loading also passed without creating a native window.
 - Offscreen checks exercise version/biome gates, new labels/colors, the upstream
   fixed Dappled Forest coordinate, underground Sulfur Caves generation, tiled vs
@@ -37,6 +37,30 @@
 - The generation library and its production objects are unchanged in r2.
 - No visible viewer was launched. Final interactive Windows inspection remains
   with the user. Markers are temporary and are not serialized into sessions.
+
+## Revision 3: persistent markers and exploration workflow — 2026-10-19
+- Native x64 Release, one low-priority build job, no additional runtime libraries.
+- 60/60 offscreen checks passed: the prior 30 checks plus 30 saved-marker checks.
+- Real editor Save/Cancel, exact signed 64-bit seed serialization, Unicode notes,
+  restart persistence, completion, duplicate handling and visibility preferences.
+- Independent edits from two store instances, lock contention, failed writes,
+  deletion, backup/import merging, corrupt-file protection and cancellation.
+- Actual Go to Save marker checkbox and repeated Apply; Markers list completion,
+  filters, keyboard activation, automatic dimension switching and target presets.
+- Seed/version/Large Biomes/dimension isolation, persistent marker pan/zoom/resize,
+  and green completed marker rendering with hiding/restoration.
+- Actual generated Village, Bastion, Fortress and Stronghold icons exercised
+  through their context menu: save, complete, hide the predicted icon and marker,
+  restore visibility, and reload completed progress from disk.
+- Seven production-object seed/version UI regression checks also passed.
+- Full interface and marker labels visually inspected in an offscreen image.
+- Generation backend/production generation objects are unchanged. Markers only
+  annotate the map and do not alter world generation or seed-search results.
+- Marker tests use explicit temporary files inside the workspace and never read
+  or write the user's marker file. No game, server, launcher, visible viewer,
+  browser or other GUI was launched; no game files/processes were touched.
+- Visible Windows interactions (native tooltips, file dialogs, display scaling)
+  remain for a brief user smoke test. The core UI paths above ran offscreen.
 
 ## Reference provenance
 Backend fixtures are in the pinned fork's `tests/test_biomes.c`,

@@ -11,6 +11,7 @@
 #include <QIcon>
 #include <QMutex>
 #include <QThread>
+#include <QSet>
 
 
 struct Level;
@@ -198,6 +199,7 @@ public:
 
     bool sshow[D_STRUCT_NUM];
     bool showBB;
+    QSet<QString> hiddenStructures;
     int gridspacing;
     int gridmultiplier;
 

@@ -1,6 +1,7 @@
 #include "mapview.h"
 
 #include "gotodialog.h"
+#include "markerstab.h"
 #include "util.h"
 
 #include <QAction>
@@ -8,6 +9,7 @@
 #include <QClipboard>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
 #include <QThread>
@@ -71,6 +73,7 @@ MapView::MapView(QWidget *parent)
     overlay = new MapOverlay(this);
     overlay->setMouseTracking(true);
     overlay->setFont(font());
+    setMouseTracking(true);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
@@ -101,6 +104,8 @@ void MapView::refresh()
         deleteWorld();
         world = new QWorld(wi, dim, lopt);
         QObject::connect(world, &QWorld::update, this, &MapView::mapUpdate);
+        settingsToWorld();
+        syncSavedMarkers();
     }
 }
 
@@ -125,6 +130,8 @@ void MapView::setSeed(WorldInfo wi, int dim, LayerOpt lopt)
         world->setDim(dim, lopt);
     }
     settingsToWorld();
+    syncSavedMarkers();
+    emit worldChanged();
     update(2);
 }
 
@@ -176,6 +183,9 @@ void MapView::setCoordinateMarker(qreal x, qreal z)
 {
     if (!world)
         return;
+    for (const SavedMarker& saved : savedMarkers)
+        if (saved.x == x && saved.z == z && !(saved.completed && markerStore->hideCompleted()))
+        { selectedMarker = saved.id; markerSet = false; update(); return; }
     markerPos = QPointF(x, z);
     markerSeed = world->wi.seed;
     markerDim = world->dim;
@@ -187,6 +197,166 @@ void MapView::clearCoordinateMarker()
 {
     markerSet = false;
     update();
+}
+
+void MapView::setMarkerStore(MarkerStore *store)
+{
+    if (markerStore) disconnect(markerStore, nullptr, this, nullptr);
+    markerStore = store;
+    if (store) connect(store, &MarkerStore::changed, this, &MapView::syncSavedMarkers);
+    syncSavedMarkers();
+}
+
+void MapView::syncSavedMarkers()
+{
+    savedMarkers.clear();
+    if (world)
+    {
+        world->hiddenStructures.clear();
+        if (markerStore) for (const SavedMarker& m : markerStore->all())
+        {
+            if (!m.matchesWorld(world->wi) || m.dimension != world->dim) continue;
+            savedMarkers.append(m);
+            if (markerSet && markerDim == world->dim && markerPos == QPointF(m.x, m.z) &&
+                !(m.completed && markerStore->hideCompleted())) markerSet = false;
+            if (m.completed && markerStore->hideCompleted() && m.kind != D_NONE)
+                world->hiddenStructures.insert(SavedMarker::structureKey(m.kind, m.x, m.z));
+        }
+        if (world->hiddenStructures.contains(SavedMarker::structureKey(world->selopt, world->selvp.p.x, world->selvp.p.z)))
+            world->selopt = D_NONE;
+    }
+    update();
+}
+
+bool MapView::savePointMarker(qreal x, qreal z)
+{
+    if (!world || !markerStore) return false;
+    SavedMarker marker;
+    marker.world = world->wi; marker.dimension = world->dim;
+    marker.x = x; marker.z = z;
+    marker.name = tr("Marker at %1, %2").arg(SavedMarker::coordinate(x), SavedMarker::coordinate(z));
+    if (!markerStore->put(marker))
+    {
+        QMessageBox::warning(this, tr("Marker was not saved"), markerStore->lastError());
+        return false;
+    }
+    selectedMarker = marker.id;
+    return true;
+}
+
+void MapView::saveMarkerOrWarn(SavedMarker marker)
+{
+    if (!markerStore->put(marker))
+        QMessageBox::warning(this, tr("Marker was not saved"), markerStore->lastError());
+    else { selectedMarker = marker.id; update(); }
+}
+
+void MapView::addSavedMarker(qreal x, qreal z)
+{
+    if (!world || !markerStore) return;
+    SavedMarker marker;
+    marker.world = world->wi; marker.dimension = world->dim;
+    marker.x = x; marker.z = z;
+    marker.name = tr("Marker");
+    auto *dialog = new MarkerEditor(markerStore, marker, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+}
+
+void MapView::addMarkerAtCenter()
+{
+    addSavedMarker(floor(getX()), floor(getZ()));
+}
+
+void MapView::editSavedMarker(const QString& id)
+{
+    if (!markerStore) return;
+    const SavedMarker marker = markerStore->find(id);
+    if (marker.id.isEmpty()) return;
+    auto *dialog = new MarkerEditor(markerStore, marker, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+}
+
+void MapView::focusSavedMarker(const QString& id)
+{
+    if (!world || !markerStore) return;
+    const SavedMarker marker = markerStore->find(id);
+    if (marker.id.isEmpty() || !marker.matchesWorld(world->wi) || marker.dimension != world->dim) return;
+    selectedMarker = id;
+    setView(marker.x, marker.z, std::min(getScale(), qreal(16)));
+    if (marker.completed && markerStore->hideCompleted()) setCoordinateMarker(marker.x, marker.z);
+    else clearCoordinateMarker();
+}
+
+QString MapView::savedMarkerAt(const QPoint& pos)
+{
+    if (!markerStore) return QString();
+    const qreal fx = getX(), fz = getZ();
+    qreal best = 18 * 18;
+    QString result;
+    for (const SavedMarker& m : savedMarkers)
+    {
+        if (m.completed && markerStore->hideCompleted()) continue;
+        const qreal dx = (m.x - fx) * blocks2pix + width()/2.0 - pos.x();
+        const qreal dz = (m.z - fz) * blocks2pix + height()/2.0 - pos.y();
+        const qreal d = dx*dx + dz*dz;
+        if (d < best) { best = d; result = m.id; }
+    }
+    return result;
+}
+
+void MapView::drawSavedMarkers(QPainter& painter, qreal fx, qreal fz)
+{
+    if (!markerStore) return;
+    painter.save();
+    painter.setFont(font());
+    for (const SavedMarker& m : savedMarkers)
+    {
+        if (m.completed && markerStore->hideCompleted()) continue;
+        const QPointF point((m.x - fx) * blocks2pix + width()/2.0,
+                            (m.z - fz) * blocks2pix + height()/2.0);
+        if (!QRectF(rect()).adjusted(-24, -24, 24, 24).contains(point)) continue;
+        const bool structure = m.kind != D_NONE;
+        if (structure)
+        {
+            const QPixmap& icon = getMapIcon(m.kind);
+            painter.drawPixmap(point - QPointF(icon.width()/2.0, icon.height()/2.0), icon);
+        }
+        const QPointF badge = point + (structure ? QPointF(8, 8) : QPointF());
+        painter.setPen(QPen(Qt::black, 4));
+        painter.setBrush(m.completed ? QColor(36, 158, 82) : QColor(40, 135, 235));
+        painter.drawEllipse(badge, 7, 7);
+        painter.setPen(QPen(Qt::white, 1.5));
+        painter.drawEllipse(badge, 7, 7);
+        painter.setPen(QPen(Qt::white, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        if (m.completed)
+        {
+            painter.drawLine(badge + QPointF(-4, 0), badge + QPointF(-1, 3));
+            painter.drawLine(badge + QPointF(-1, 3), badge + QPointF(4, -3));
+        }
+        else painter.drawPoint(badge);
+        if (m.id == selectedMarker)
+        {
+            painter.setBrush(Qt::NoBrush); painter.setPen(QPen(Qt::white, 1));
+            painter.drawEllipse(point, 14, 14);
+        }
+        if (markerStore->showLabels() || m.id == selectedMarker || m.id == hoveredMarker)
+        {
+            const QString text = m.name + (m.completed ? tr(" (completed)") : QString());
+            const QFontMetrics fm = painter.fontMetrics();
+            const QString elided = fm.elidedText(text, Qt::ElideRight, qMax(80, qMin(300, width()-8)));
+            QRectF box(0, 0, fm.horizontalAdvance(elided) + 10, fm.height() + 6);
+            box.moveTopLeft(point + QPointF(18, -box.height()-5));
+            if (box.right() > width()-3) box.moveRight(width()-3);
+            if (box.left() < 3) box.moveLeft(3);
+            if (box.top() < 3) box.moveTop(point.y()+18);
+            painter.setPen(Qt::NoPen); painter.setBrush(QColor(0, 0, 0, 200));
+            painter.drawRoundedRect(box, 3, 3);
+            painter.setPen(Qt::white); painter.drawText(box, Qt::AlignCenter, elided);
+        }
+    }
+    painter.restore();
 }
 
 void MapView::drawCoordinateMarker(QPainter& painter, qreal fx, qreal fz)
@@ -426,13 +596,19 @@ void MapView::mapUpdate()
     update(1);
 }
 
-void MapView::showContextMenu(const QPoint &pos)
+QMenu *MapView::createContextMenu(const QPoint &pos)
 {
     QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->setObjectName("mapContextMenu");
     menu->setFont(font());
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
+    const qreal fx = getX(), fz = getZ();
+    setView(fx, fz, getScale());
+    const qreal clickedX = floor((pos.x()-width()/2.0)/blocks2pix + fx);
+    const qreal clickedZ = floor((pos.y()-height()/2.0)/blocks2pix + fz);
     if (world)
     {
         mstart = pos;
@@ -443,7 +619,7 @@ void MapView::showContextMenu(const QPoint &pos)
     struct _cpy_dat { QString txt, cpy; };
     std::vector<_cpy_dat> cpy_dat;
 
-    VarPos vp = getActivePos();
+    VarPos vp = world && world->selopt != D_NONE ? world->selvp : VarPos({(int)clickedX, (int)clickedZ}, -1);
     const QPixmap *icon = 0;
 
     if (vp.type != -1)
@@ -487,6 +663,42 @@ void MapView::showContextMenu(const QPoint &pos)
     menu->addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
     if (markerSet && world && markerDim == world->dim)
         menu->addAction(tr("Clear coordinate marker"), this, &MapView::clearCoordinateMarker);
+    if (markerStore && world)
+    {
+        menu->addSeparator();
+        menu->addAction(tr("Add marker here..."), this, [=] { addSavedMarker(clickedX, clickedZ); })
+            ->setObjectName("addSavedMarkerHere");
+        if (markerSet && markerDim == world->dim)
+            menu->addAction(tr("Save Go to coordinate marker..."), this, [=] { addSavedMarker(markerPos.x(), markerPos.y()); });
+        const QString id = savedMarkerAt(pos);
+        if (!id.isEmpty())
+        {
+            const SavedMarker marker = markerStore->find(id);
+            menu->addAction(marker.completed ? tr("Mark as not completed") : tr("Mark as completed"), this,
+                [=] { if (!markerStore->setCompleted(id, !marker.completed))
+                    QMessageBox::warning(this, tr("Progress was not saved"), markerStore->lastError()); })
+                ->setObjectName("toggleSavedCompleted");
+            menu->addAction(tr("Edit saved marker..."), this, [=] { editSavedMarker(id); });
+            menu->addAction(tr("Delete saved marker..."), this, [=] {
+                if (QMessageBox::question(this, tr("Delete marker"), tr("Delete '%1' and its saved progress?").arg(marker.name)) == QMessageBox::Yes)
+                    if (!markerStore->remove(id)) QMessageBox::warning(this, tr("Marker was not deleted"), markerStore->lastError());
+            });
+        }
+        else if (world->selopt != D_NONE)
+        {
+            SavedMarker marker;
+            marker.world = world->wi; marker.dimension = world->dim;
+            marker.kind = world->selopt; marker.x = vp.p.x; marker.z = vp.p.z;
+            marker.name = marker.typeName();
+            menu->addAction(tr("Save %1 marker").arg(marker.typeName()), this, [=] { saveMarkerOrWarn(marker); })
+                ->setObjectName("saveStructureMarker");
+            marker.completed = true;
+            menu->addAction(tr("Mark %1 as completed").arg(marker.typeName()), this, [=] { saveMarkerOrWarn(marker); })
+                ->setObjectName("completeStructure");
+        }
+        menu->addAction(tr("Saved markers..."), this, &MapView::showMarkersRequested);
+        menu->addSeparator();
+    }
     if (world)
     {
         QString txt = tr("Copy seed:");
@@ -510,7 +722,12 @@ void MapView::showContextMenu(const QPoint &pos)
 
     for (QAction *act : menu->actions())
         act->setFont(font());
-    menu->popup(mapToGlobal(pos));
+    return menu;
+}
+
+void MapView::showContextMenu(const QPoint& pos)
+{
+    createContextMenu(pos)->popup(mapToGlobal(pos));
 }
 
 void MapView::runAni()
@@ -592,6 +809,7 @@ void MapView::paintEvent(QPaintEvent *)
             painter.drawText(textrec, s);
         }
 
+        drawSavedMarkers(painter, fx, fz);
         drawCoordinateMarker(painter, fx, fz);
 
         bool active = world->isBusy();
@@ -643,6 +861,7 @@ void MapView::mousePressEvent(QMouseEvent *e)
     if (e->button() == Qt::LeftButton)
     {
         mprev = mstart = e->pos();
+        selectedMarker = savedMarkerAt(e->pos());
         holding = true;
         prevx = focusx = getX();
         prevz = focusz = getZ();
@@ -668,6 +887,21 @@ void MapView::mousePressEvent(QMouseEvent *e)
 
 void MapView::mouseMoveEvent(QMouseEvent *e)
 {
+    if (!(e->buttons() & Qt::LeftButton) && markerStore)
+    {
+        const QString id = savedMarkerAt(e->pos());
+        if (id != hoveredMarker)
+        {
+            hoveredMarker = id;
+            const SavedMarker marker = markerStore->find(id);
+            const QString tooltip = id.isEmpty() ? QString() : marker.name + "\n" +
+                (marker.completed ? tr("Completed") : tr("To do")) + "\nX: " + SavedMarker::coordinate(marker.x) +
+                "  Z: " + SavedMarker::coordinate(marker.z) + (marker.notes.isEmpty() ? QString() : "\n" + marker.notes);
+            overlay->setToolTip(tooltip);
+            setToolTip(tooltip);
+            update();
+        }
+    }
     if ((e->buttons() & Qt::LeftButton) && holding)
     {
         QPoint d = e->pos() - mprev;

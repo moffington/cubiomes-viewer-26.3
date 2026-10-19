@@ -2,9 +2,12 @@
 #define MAPVIEW_H
 
 #include "world.h"
+#include "markers.h"
 
 #include <QDockWidget>
 #include <QElapsedTimer>
+
+class QMenu;
 
 class MapOverlay : public QWidget
 {
@@ -44,6 +47,12 @@ public:
     void animateView(qreal x, qreal z, qreal scale);
     void zoom(qreal factor);
     void setCoordinateMarker(qreal x, qreal z);
+    void setMarkerStore(MarkerStore *store);
+    bool savePointMarker(qreal x, qreal z);
+    bool canSaveMarkers() const { return markerStore != nullptr; }
+    void addSavedMarker(qreal x, qreal z);
+    void focusSavedMarker(const QString& id);
+    QMenu *createContextMenu(const QPoint& pos);
 
     // animation
     qreal x_src, z_src, s_src;
@@ -70,9 +79,16 @@ private:
     void settingsToWorld();
     void runAni();
     void drawCoordinateMarker(QPainter& painter, qreal fx, qreal fz);
+    void drawSavedMarkers(QPainter& painter, qreal fx, qreal fz);
+    void syncSavedMarkers();
+    QString savedMarkerAt(const QPoint& pos);
+    void editSavedMarker(const QString& id);
+    void saveMarkerOrWarn(SavedMarker marker);
 
 signals:
     void layerChange(int mode, int disp);
+    void worldChanged();
+    void showMarkersRequested();
 
 public slots:
     void mapUpdate();
@@ -81,6 +97,7 @@ public slots:
     void copyText(QString txt);
     void onGoto();
     void clearCoordinateMarker();
+    void addMarkerAtCenter();
 
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
     void resizeEvent(QResizeEvent *) Q_DECL_OVERRIDE;
@@ -119,6 +136,9 @@ private:
     QPointF markerPos;
     uint64_t markerSeed = 0;
     int markerDim = DIM_OVERWORLD;
+    MarkerStore *markerStore = nullptr;
+    QVector<SavedMarker> savedMarkers;
+    QString selectedMarker, hoveredMarker;
 
     std::vector<Shape> shapes;
 

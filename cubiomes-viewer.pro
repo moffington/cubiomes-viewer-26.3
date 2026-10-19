@@ -139,6 +139,9 @@ SOURCES += \
         src/presetdialog.cpp \
         src/layerdialog.cpp \
         src/mapview.cpp \
+        src/markers.cpp \
+        src/markerstab.cpp \
+        src/markerselftest.cpp \
         src/rangedialog.cpp \
         src/scripts.cpp \
         src/search.cpp \
@@ -205,6 +208,8 @@ HEADERS += \
         src/presetdialog.h \
         src/layerdialog.h \
         src/mapview.h \
+        src/markers.h \
+        src/markerstab.h \
         src/qzipwriter.h \
         src/rangedialog.h \
         src/scripts.h \
