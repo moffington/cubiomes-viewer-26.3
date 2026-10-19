@@ -1,0 +1,3 @@
+libwinsane by Chris Wellons (nullprogram)
+This is free and unencumbered software released into the public domain.
+https://github.com/skeeto/libwinsane

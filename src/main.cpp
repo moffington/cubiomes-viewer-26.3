@@ -10,6 +10,8 @@
 #include <QGuiApplication>
 #include <QStandardPaths>
 
+int runSelfTests(int argc, char **argv);
+
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 {
@@ -36,6 +38,7 @@ int main(int argc, char *argv[])
     bool clear = false;
     bool reset = false;
     bool usage = false;
+    bool selftest = false;
     QString sessionpath;
     QString resultspath;
 
@@ -45,6 +48,8 @@ int main(int argc, char *argv[])
             version = true;
         else if (strcmp(argv[i], "--nogui") == 0)
             nogui = true;
+        else if (strcmp(argv[i], "--self-test") == 0)
+            selftest = true;
         else if (strcmp(argv[i], "--reset") == 0)
             clear = true;
         else if (strcmp(argv[i], "--reset-all") == 0)
@@ -69,6 +74,7 @@ int main(int argc, char *argv[])
                 "      --help                 Display this help and exit.\n"
                 "      --version              Output version information and exit.\n"
                 "      --nogui                Run in headless search mode.\n"
+                "      --self-test            Run isolated Qt offscreen validation and exit.\n"
                 "      --reset                Discard results and reset starting seed.\n"
                 "      --reset-all            Clear settings and remove all session data.\n"
                 "      --session=file         Open this session file.\n"
@@ -82,6 +88,8 @@ int main(int argc, char *argv[])
         printf("%s %s\n", APP_STRING, getVersStr().toLocal8Bit().data());
         exit(0);
     }
+    if (selftest)
+        return runSelfTests(argc, argv);
 
     if (reset)
     {

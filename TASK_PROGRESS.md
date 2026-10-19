@@ -10,10 +10,18 @@
   fork is more complete for this task. SeedMapper also uses this backend.
 
 ## Remaining
-- Install workspace-local Qt build files, integrate backend with qmake.
-- Update version selection, biome labels and camp overlay.
-- Compile Release with one job; run upstream and targeted headless tests.
 - Package portable Windows runtime, source, licenses, and validation notes.
+
+## Implementation and validation completed
+- Workspace-local Qt 6.8.3 / matching MinGW 13.1.0; native x64 Release built.
+- Dedicated 26.3 backend, version selector/default, biome labels/colors, camp
+  overlay/analysis/filter and new salt-provider API integrated.
+- Portable runtime staged; 22/22 isolated offscreen viewer checks passed.
+- 5/5 complete upstream suites passed; four relevant upstream suites also passed
+  against the exact production backend objects linked into the executable.
+- 300 independent candidate-position comparisons across 15 structure types passed.
+- All 256 biome IDs matched final 26.3 camp eligibility (18 allowed biomes).
+- Added user/build/validation documentation with explicit accuracy limits.
 
 ## Constraints / limitations
 - No Minecraft, launcher, server, visible application or browser will be opened.

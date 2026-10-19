@@ -143,6 +143,7 @@ SOURCES += \
         src/scripts.cpp \
         src/search.cpp \
         src/searchthread.cpp \
+        src/selftest.cpp \
         src/tabbiomes.cpp \
         src/tablocations.cpp \
         src/tabstructures.cpp \

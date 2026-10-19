@@ -1,0 +1,37 @@
+Cubiomes Viewer 4.1.2-mc26.3
+
+Viewer: Cubitect and contributors, GNU GPL version 3.
+https://github.com/Cubitect/cubiomes-viewer
+Full corresponding viewer/backend source is supplied in the accompanying
+Cubiomes-Viewer-26.3-Source.zip. Modifications and reproduction instructions
+are described in README-26.3.md, BUILD_WINDOWS_26.3.md, and VALIDATION.md.
+
+Generation backend: Cubitect, xpple and contributors, MIT license.
+https://github.com/xpple/cubiomes
+Pinned unmodified commit b99f6e472018cab903a096697117aab9d9170a19.
+
+Qt 6.8.3: The Qt Company and contributors, dynamically linked under LGPLv3.
+License texts, third-party notices and the Qt REUSE mapping are in licenses/Qt6.8.3.
+Complete matching Qt source:
+https://download.qt.io/archive/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz
+https://github.com/qt/qtbase/tree/v6.8.3
+Qt libraries can be replaced by compatible builds alongside the executable.
+
+MinGW GCC 13.1.0 compiler runtime: Free Software Foundation and contributors.
+GNU GPL with GCC Runtime Library Exception; see licenses/MinGW/gcc.
+https://gcc.gnu.org/releases.html
+MinGW-w64 and winpthreads notices: licenses/MinGW.
+https://github.com/mingw-w64/mingw-w64/tree/v11.0.0
+
+Lua: Copyright (C) 1994-2022 Lua.org, PUC-Rio; MIT license.
+QDarkStyleSheet theme: Colin Duquesnoy and contributors; MIT license.
+libwinsane: Chris Wellons; public domain.
+Biome colors and icons are inspired by Amidst, GPLv3; existing attribution
+and source resources are retained in the accompanying source archive.
+
+Version-specific test data was extracted from Minecraft Java 26.3 by mcmeta:
+https://github.com/misode/mcmeta/tree/26.3-summary
+Test fixtures retain source URLs in tests/validate_structures.py and VALIDATION.md.
+
+NOT AN OFFICIAL MINECRAFT PRODUCT.
+NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
