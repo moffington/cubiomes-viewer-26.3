@@ -1,8 +1,6 @@
 # Cubiomes Viewer for Minecraft Java 26.3
 
-A community Windows build of [Cubitect's Cubiomes Viewer](https://github.com/Cubitect/cubiomes-viewer),
-maintained here by [moffington](https://github.com/moffington), with the generation
-backend from [xpple/cubiomes](https://github.com/xpple/cubiomes).
+A community Windows build of [Cubitect's Cubiomes Viewer](https://github.com/Cubitect/cubiomes-viewer) with the generation backend from [xpple/cubiomes](https://github.com/xpple/cubiomes).
 
 **[Download the Windows build](https://github.com/moffington/cubiomes-viewer-26.3/releases/tag/v4.1.2-mc26.3)**
 and choose `Cubiomes-Viewer-26.3-r2-Windows-x64.zip` under Assets.
