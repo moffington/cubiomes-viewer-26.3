@@ -2,6 +2,8 @@
 #define SEARCH_H
 
 #include "cubiomes/finders.h"
+#include "cubiomes/features/end_city.h"
+#include "cubiomes/features/fortress.h"
 
 #include "lua/src/lua.hpp"
 
@@ -92,6 +94,7 @@ enum
     F_BIOME_SAMPLE,
     F_NOISE_SAMPLE,
     F_CHAMBERS,
+    F_CAMP,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -509,6 +512,13 @@ static const struct FilterList : private FilterInfo
             CAT_STRUCT, 1, LOC_RAD, Trial_Chambers, 1, BR_CLUST, MC_1_21_1, MC_NEWEST, 0, 0, disp++,
             "chambers",
             QT_TRANSLATE_NOOP("Filter", "Trial chambers"),
+            ""
+        };
+
+        list[F_CAMP] = FilterInfo{
+            CAT_STRUCT, 1, LOC_RAD, Abandoned_Camp, 1, BR_CLUST, MC_26_3, MC_NEWEST, 0, 0, disp++,
+            "camp",
+            QT_TRANSLATE_NOOP("Filter", "Abandoned camp"),
             ""
         };
 

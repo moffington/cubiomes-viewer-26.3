@@ -3,6 +3,10 @@
 
 #include "cubiomes/finders.h"
 
+// Viewer entry point used by map and search code. Registered with the fork's
+// provider API so custom salts also apply inside getStructurePos().
+extern "C" int getStructureConfig_override(int stype, int mc, StructureConfig *sconf);
+
 #include <QSettings>
 #include <QString>
 #include <QFont>
@@ -15,7 +19,7 @@
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
-enum { MC_DEFAULT = MC_1_21_3 };
+enum { MC_DEFAULT = MC_26_3 };
 
 struct ExtGenConfig
 {
@@ -120,6 +124,7 @@ enum {
     D_ANCIENTCITY,
     D_TRAILRUINS,
     D_CHAMBERS,
+    D_CAMP,
     D_PORTAL,
     D_PORTALN,
     D_FORTESS,

@@ -33,6 +33,7 @@ ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenConfig *extgen)
         Bastion,
         End_City,
         End_Gateway,
+        Abandoned_Camp,
     };
 
     QGridLayout *grid = new QGridLayout(ui->groupSalts);
@@ -42,13 +43,6 @@ ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenConfig *extgen)
         grid->addWidget((checkSalts[st] = new QCheckBox(struct2str(st))), i, 0);
         grid->addWidget((lineSalts[st] = new QLineEdit()), i, 1);
         connect(checkSalts[st], &QCheckBox::toggled, this, &ExtGenDialog::updateToggles);
-    }
-
-    Pos dummy;
-    if (!getStructurePos(Feature, INT_MAX, 0, 0, 0, &dummy))
-    {
-        // cubiomes was not built with salt override support
-        ui->groupSalts->setEnabled(false);
     }
 
     initSettings(extgen);

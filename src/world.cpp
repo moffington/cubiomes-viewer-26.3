@@ -215,6 +215,10 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 {
                     id = getBiomeAt(&g, 4, (p.x >> 2) + 2, 0, (p.z >> 2) + 2);
                 }
+                else if (sconf.structType == Abandoned_Camp)
+                {
+                    id = getBiomeAt(&g, 4, p.x >> 2, 320 >> 2, p.z >> 2);
+                }
                 else if (sconf.structType == Fortress)
                 {
                     int n = getFortressPieces(pieces, sizeof(pieces)/sizeof(pieces[0]),

@@ -19,7 +19,7 @@ inline int cmpVers(int major, int minor, int patch)
     int p0 = VERS_PATCH >= 0 ? 1000+VERS_PATCH : -VERS_PATCH;
     int p1 = patch      >= 0 ? 1000+patch      : -patch;
     s = (p1 > p0) - (p1 < p0);
-    return s;
+    return s + "-mc26.3";
 }
 
 inline QString getVersStr()

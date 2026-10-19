@@ -11,9 +11,9 @@ QT += core widgets
 #QMAKE_CXX = clang++
 
 CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
-QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+QMAKE_CFLAGS            = $$CHARSET -fwrapv
 QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS
-QMAKE_CXXFLAGS_RELEASE  *= -O3 -g3
+QMAKE_CXXFLAGS_RELEASE  *= -O3
 
 greaterThan(QT_MAJOR_VERSION, 5) {
     QMAKE_CXXFLAGS += -std=gnu++17
@@ -26,7 +26,7 @@ greaterThan(QT_MAJOR_VERSION, 5) {
 }
 
 win32: {
-    CONFIG += static_gnu
+    # Qt is deployed as DLLs; keep the compiler runtimes portable as well.
 
     # thank you nullprogram for dealing with the Windows UTF-16 nonsense
     LIBWINSANE          = $$PWD/src/libwinsane
@@ -63,11 +63,27 @@ CONFIG(debug, debug|release): {
     CUTARGET = release
 }
 
-# compile cubiomes
+# Compile the pinned backend with the same flags as the viewer. The fork uses
+# CMake instead of the old makefile. Loot parsing is unused by this application.
 CUPATH              = $$PWD/cubiomes
-QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$(CFLAGS) $$QMAKE_CFLAGS\" $$CUTARGET
-QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
-LIBS                += $$CUPATH/libcubiomes.a -lm
+SOURCES += \
+    $$CUPATH/noise.c \
+    $$CUPATH/biomes.c \
+    $$CUPATH/layers.c \
+    $$CUPATH/biomenoise.c \
+    $$CUPATH/generator.c \
+    $$CUPATH/finders.c \
+    $$CUPATH/terrainnoise.c \
+    $$CUPATH/carver.c \
+    $$CUPATH/xradv.c \
+    $$CUPATH/quadbase.c \
+    $$CUPATH/features/abandoned_camp.c \
+    $$CUPATH/features/end_city.c \
+    $$CUPATH/features/fortress.c \
+    $$CUPATH/features/stronghold.c \
+    $$CUPATH/features/ore.c \
+    src/cubiomes_util.c
+LIBS += -lm
 
 LUAPATH = $$PWD/lua/src
 

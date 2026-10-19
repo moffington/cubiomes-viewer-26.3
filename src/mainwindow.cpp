@@ -184,6 +184,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     addMapAction(D_ANCIENTCITY);
     addMapAction(D_TRAILRUINS);
     addMapAction(D_CHAMBERS);
+    addMapAction(D_CAMP);
     ui->toolBar->addSeparator();
     addMapAction(D_FORTESS);
     addMapAction(D_BASTION);
@@ -696,7 +697,7 @@ void MainWindow::setMCList(bool experimental)
     {
         if (!experimental && mc != wi.mc)
         {
-            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_21_1 || mc == MC_1_21_WD)
+            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_21_1)
                 continue;
         }
         mclist.append(mc2str(mc));
